@@ -2,10 +2,14 @@
 """
 Installiert das gebaute Add-on ins lokale Anki-Addons-Verzeichnis.
 Nützlich für schnelle Development-Zyklen.
+
+Sicherheit: Bei Fehlern bleibt das alte Add-on intakt.
 """
 
 import shutil
 import sys
+import tempfile
+import zipfile
 from pathlib import Path
 
 ANKI_ADDONS_DIRS = {
@@ -33,26 +37,46 @@ def install_addon() -> None:
         print("Bitte starte zuerst Anki, damit das Verzeichnis erstellt wird.")
         sys.exit(1)
 
-    for addon_file in sorted(BUILD_DIR.glob("*.ankiaddon")):
+    addon_files = sorted(BUILD_DIR.glob("*.ankiaddon"))
+    if not addon_files:
+        print(f"No .ankiaddon files found in {BUILD_DIR}")
+        sys.exit(1)
+
+    for addon_file in addon_files:
         addon_name = addon_file.stem  # z.B. "ai_flashcards"
         addon_dir = addons_dir / addon_name
 
         print(f"Installing {addon_name}...")
 
-        # Altes Add-on löschen
-        if addon_dir.exists():
-            print(f"  Removing old: {addon_dir}")
-            shutil.rmtree(addon_dir)
+        # 1. In temporäres Verzeichnis entpacken (sicher vor Fehlern)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir) / addon_name
+            try:
+                print(f"  Extracting to temporary directory...")
+                with zipfile.ZipFile(addon_file, 'r') as zf:
+                    zf.extractall(tmp_path)
+                print(f"  ✓ Extraction successful")
+            except Exception as exc:
+                print(f"  ✗ Failed to extract {addon_file}: {exc}")
+                print(f"  (Old addon at {addon_dir} remains untouched)")
+                sys.exit(1)
 
-        # Neues Add-on entpacken
-        addon_dir.mkdir(parents=True, exist_ok=True)
-        shutil.unpack_archive(addon_file, addon_dir)
+            # 2. Altes Add-on nur jetzt ersetzen (wenn neues valide ist)
+            if addon_dir.exists():
+                print(f"  Removing old: {addon_dir}")
+                shutil.rmtree(addon_dir)
 
-        print(f"  Installed to: {addon_dir}")
+            # 3. Neues Add-on installieren
+            print(f"  Moving to: {addon_dir}")
+            shutil.move(str(tmp_path), str(addon_dir))
 
-    print("\nDone! Restart Anki to reload addons.")
+        print(f"  ✓ {addon_name} installed successfully\n")
+
+    print("Done! Restart Anki to reload addons.")
 
 
 if __name__ == "__main__":
     install_addon()
+
+
 
