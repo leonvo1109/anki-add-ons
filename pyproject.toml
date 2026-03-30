@@ -21,6 +21,10 @@ dependencies = [
 
 [tool.hatch.envs.default.scripts]
 build = "python scripts/build_all.py"
+install-dev = [
+  "python scripts/build_all.py",
+  "python scripts/install_dev.py"
+]
 fmt = [
   "black .",
   "ruff check --fix ."
