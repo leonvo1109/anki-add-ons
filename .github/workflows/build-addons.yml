@@ -1,0 +1,30 @@
+hname: Build Anki Add-ons
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Build add-ons
+        run: python scripts/build_all.py
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: anki-addons
+          path: build/*.ankiaddon
+          if-no-files-found: error
+
