@@ -1,4 +1,4 @@
-hname: Build Anki Add-ons
+name: Build Anki Add-ons
 
 on:
   push:
