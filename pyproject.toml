@@ -1,0 +1,8 @@
+[project]
+name = "anki-add-ons"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.14"
+dependencies = [
+    "anki>=25.9.2",
+]
