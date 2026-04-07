@@ -91,6 +91,13 @@ python scripts/build_all.py
 # Erzeugt: build/ai_flashcards.ankiaddon
 ```
 
+### Build + Install in lokale Anki-Instanz
+
+```zsh
+hatch run install-dev
+# Baut immer frisch neu und installiert danach ins lokale Anki-Profil
+```
+
 ### GitHub Actions
 
 Bei Push/PR auf `main` wird automatisch:
@@ -109,7 +116,11 @@ Siehe: [`.github/workflows/build-addons.yml`](.github/workflows/build-addons.yml
 
 ### AI Flashcards Config
 
-**Datei:** `~/.local/share/Anki2/addons21/ai_flashcards/config.json` (Linux/macOS)
+**Datei:** abhängig vom Betriebssystem:
+
+- macOS: `~/Library/Application Support/Anki2/addons21/ai_flashcards/config.json`
+- Linux: `~/.local/share/Anki2/addons21/ai_flashcards/config.json`
+- Windows: `%APPDATA%/Anki2/addons21/ai_flashcards/config.json`
 
 ```json
 {
@@ -143,6 +154,8 @@ hatch run fmt
 # Type-Check
 hatch run check
 ```
+
+> Wichtig: `install-dev` führt zuerst `scripts/build_all.py` aus und installiert dann die frische `.ankiaddon`-Datei ins lokale Anki-Profil. Wenn du nur den Repo-Ordner löschst, bleibt die installierte Kopie in deinem Anki-Profil unverändert.
 
 ### Struktur eines neuen Add-ons
 

@@ -9,6 +9,7 @@ Sicherheit: Bei Fehlern bleibt das alte Add-on intakt.
 import shutil
 import sys
 import tempfile
+import subprocess
 import zipfile
 from pathlib import Path
 
@@ -20,11 +21,10 @@ ANKI_ADDONS_DIRS = {
 
 ROOT = Path(__file__).resolve().parent.parent
 BUILD_DIR = ROOT / "build"
+BUILD_SCRIPT = ROOT / "scripts" / "build_all.py"
 
 
 def install_addon() -> None:
-    import platform
-
     system = sys.platform
     addons_dir = ANKI_ADDONS_DIRS.get(system)
 
@@ -37,10 +37,15 @@ def install_addon() -> None:
         print("Bitte starte zuerst Anki, damit das Verzeichnis erstellt wird.")
         sys.exit(1)
 
+    print(f"Building fresh addons via: {BUILD_SCRIPT}")
+    subprocess.run([sys.executable, str(BUILD_SCRIPT)], check=True)
+
     addon_files = sorted(BUILD_DIR.glob("*.ankiaddon"))
     if not addon_files:
         print(f"No .ankiaddon files found in {BUILD_DIR}")
         sys.exit(1)
+
+    print(f"Installing into Anki addons dir: {addons_dir}")
 
     for addon_file in addon_files:
         addon_name = addon_file.stem  # z.B. "ai_flashcards"
